@@ -28,6 +28,8 @@ concepts = {
             "2학기 기말고사": ["입체도형", "통계"],
         },
         "과학": {
+            "1학기 중간고사": ["생물의 구성과 다양성"],
+            "1학기 기말고사": ["태양계"],
             "2학기 중간고사": ["온도와 열", "물질의 상태 변화"],
             "2학기 기말고사": ["여러 가지 힘", "기체의 성질"],
         },
@@ -65,15 +67,35 @@ concepts = {
 # -----------------------
 # 선택에 따른 개념 출력
 # -----------------------
+
 st.subheader(f"✅ {grade} {subject} - {exam_type} 대비 개념 정리")
 
 if grade in concepts and subject in concepts[grade] and exam_type in concepts[grade][subject]:
     selected_concepts = concepts[grade][subject][exam_type]
     
+    # 초기화: 세션 상태에 저장된 설명이 없으면 기본 설명 세팅
+    if 'concept_descriptions' not in st.session_state:
+        st.session_state.concept_descriptions = {}
+    
     for idx, concept in enumerate(selected_concepts, 1):
         st.markdown(f"**{idx}. {concept}**")
-        # 아래에 각 개념에 대한 상세 설명을 추후 추가 가능
+        
+        # 세션 상태 키 생성 (학년-과목-시험-개념별 고유키)
+        key = f"{grade}_{subject}_{exam_type}_{concept}"
+        
+        # 세션 상태에 없으면 기본 텍스트 세팅
+        if key not in st.session_state.concept_descriptions:
+            st.session_state.concept_descriptions[key] = ""
+        
         with st.expander("자세히 보기"):
-            st.write(f"{concept}에 대한 개념 설명을 여기에 추가하세요.")
+            # 텍스트 입력창
+            description = st.text_area(
+                "개념 설명 입력", 
+                value=st.session_state.concept_descriptions[key], 
+                key=key + "_textarea"
+            )
+            
+            # 입력값을 세션 상태에 저장
+            st.session_state.concept_descriptions[key] = description
 else:
     st.info("선택한 항목에 대한 개념 정리가 아직 등록되지 않았습니다.")
